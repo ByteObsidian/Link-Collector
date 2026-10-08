@@ -58,6 +58,11 @@ Follow these steps to upload your extension to the Chrome Web Store.
 ## Updates
 For future updates:
 1.  Bump the version in `manifest.json`.
-2.  Create a new ZIP.
+2.  Create a new ZIP from only the extension files listed above.
 3.  Go to the item in the dashboard.
 4.  Click **"Package"** > **"Upload new package"**.
+
+## GitHub Pages and Releases
+- The project site is published from `docs/` by the GitHub Actions workflow at `.github/workflows/pages.yml`.
+- Download the signed Chrome package (`.crx`) from [GitHub Releases](https://github.com/ByteObsidian/Link-Collector/releases).
+- Keep the local signing key (`link-collector-signing-key.pem`) private and backed up. Do not upload it; it is needed to keep the extension ID stable when packaging future CRX updates.
