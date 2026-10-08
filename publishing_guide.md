@@ -6,7 +6,7 @@ Follow these steps to upload your extension to the Chrome Web Store.
 - A Google Account.
 - A Developer Account on the Chrome Web Store (requires a one-time $5 fee).
 - A ZIP package of the extension files (create it locally before uploading; generated ZIPs are not stored in this repository).
-- Promotional images (Banner, Icon, Screenshots - currently using placeholders or need to be prepared if not ready).
+- Promotional images in the `store-assets/` folder.
 
 ## Steps
 
