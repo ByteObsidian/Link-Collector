@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Link Collector</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="app-container">
+    <header>
+      <div class="header-top">
+        <h1>Link Collector</h1>
+        <span id="url-count" class="url-count">0 URLs</span>
+      </div>
+
+      <div id="list-view-controls">
+        <div class="control-row">
+          <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search tabs..." autocomplete="off" autofocus>
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <div class="format-toggle">
+            <button id="format-ui-btn" class="toggle-btn icon-only" title="Cards View">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+            </button>
+            <button id="format-text-btn" class="toggle-btn icon-only active" title="Text View">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="21" y1="10" x2="3" y2="10"></line>
+                <line x1="21" y1="6" x2="3" y2="6"></line>
+                <line x1="21" y1="14" x2="3" y2="14"></line>
+                <line x1="21" y1="18" x2="3" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <input type="text" id="exclude-pattern" class="text-input"
+          placeholder="Exclude, comma separated (e.g. mail, youtube)" autocomplete="off">
+
+        <div class="filter-options">
+          <label><input type="checkbox" id="current-window-only"> Current window</label>
+          <label><input type="checkbox" id="include-active-tab"> Active tab</label>
+          <label><input type="checkbox" id="dedupe"> No duplicates</label>
+        </div>
+
+        <div class="action-row">
+          <select id="output-format" class="select-input" title="Output format">
+            <option value="url">URLs</option>
+            <option value="title-url">Title + URL</option>
+            <option value="markdown">Markdown</option>
+            <option value="html">HTML links</option>
+            <option value="csv">CSV</option>
+            <option value="json">JSON</option>
+          </select>
+          <button id="copy-btn" class="primary-btn" title="Copy (Ctrl+Enter)">Copy</button>
+          <button id="open-btn" class="secondary-btn" title="Open every URL in the text box as a new tab">Open all</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div id="list-view">
+        <ul id="link-list"></ul>
+
+        <div id="text-mode-container" class="hidden">
+          <div id="line-numbers"></div>
+          <textarea id="url-list-text" spellcheck="false"></textarea>
+        </div>
+
+        <div id="empty-state" class="hidden">
+          <p>No tabs found matching your search.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="popup.js"></script>
+</body>
+
+</html>

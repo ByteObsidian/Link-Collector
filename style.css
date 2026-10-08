@@ -1,0 +1,431 @@
+:root {
+  color-scheme: light;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --success: #16a34a;
+  --error: #dc2626;
+  --warning: #d97706;
+  --bg-color: #f8fafc;
+  --surface-color: #ffffff;
+  --text-main: #0f172a;
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+  --border-hover: #cbd5e1;
+  --hover-bg: rgba(0, 0, 0, 0.05);
+  --focus-ring: rgba(59, 130, 246, 0.15);
+  --scrollbar: #cbd5e1;
+  --scrollbar-hover: #94a3b8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --primary: #60a5fa;
+    --primary-hover: #3b82f6;
+    --success: #22c55e;
+    --error: #f87171;
+    --warning: #fbbf24;
+    --bg-color: #0f172a;
+    --surface-color: #1e293b;
+    --text-main: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --border-color: #334155;
+    --border-hover: #475569;
+    --hover-bg: rgba(255, 255, 255, 0.08);
+    --focus-ring: rgba(96, 165, 250, 0.25);
+    --scrollbar: #475569;
+    --scrollbar-hover: #64748b;
+  }
+}
+
+body {
+  width: 380px;
+  height: 540px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  margin: 0;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  overflow: hidden;
+  /* Prevent body scroll, handle in main */
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+header {
+  background-color: var(--surface-color);
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-color);
+  z-index: 10;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+h1 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-main);
+}
+
+/* Buttons */
+.primary-btn,
+.secondary-btn {
+  border: 1px solid transparent;
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.primary-btn {
+  background-color: var(--primary);
+  color: white;
+}
+
+.primary-btn:hover {
+  background-color: var(--primary-hover);
+}
+
+.secondary-btn {
+  background-color: var(--surface-color);
+  border-color: var(--border-color);
+  color: var(--text-main);
+}
+
+.secondary-btn:hover {
+  border-color: var(--border-hover);
+  background-color: var(--hover-bg);
+}
+
+.primary-btn.success,
+.secondary-btn.success {
+  background-color: var(--success);
+  border-color: var(--success);
+  color: white;
+}
+
+.primary-btn.error,
+.secondary-btn.error {
+  background-color: var(--error);
+  border-color: var(--error);
+  color: white;
+}
+
+.primary-btn.warning,
+.secondary-btn.warning {
+  background-color: var(--warning);
+  border-color: var(--warning);
+  color: white;
+}
+
+button:focus-visible,
+select:focus-visible,
+input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Inputs */
+.search-container {
+  position: relative;
+  flex: 1;
+}
+
+#search-input,
+.text-input,
+.select-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+#search-input {
+  padding: 9px 10px 9px 34px;
+}
+
+.text-input {
+  margin-top: 8px;
+  padding: 8px 10px;
+}
+
+.select-input {
+  width: auto;
+  flex: 1;
+  padding: 6px 8px;
+  cursor: pointer;
+}
+
+#search-input:focus,
+.text-input:focus,
+.select-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background-color: var(--surface-color);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.search-icon {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.filter-options label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.filter-options input {
+  margin: 0 5px 0 0;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.action-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+main {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+#list-view {
+  height: 100%;
+}
+
+/* Custom Scrollbar */
+main::-webkit-scrollbar,
+textarea#url-list-text::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+main::-webkit-scrollbar-track,
+textarea#url-list-text::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+main::-webkit-scrollbar-thumb,
+textarea#url-list-text::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar);
+  border-radius: 4px;
+}
+
+main::-webkit-scrollbar-thumb:hover,
+textarea#url-list-text::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-hover);
+}
+
+#link-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.link-item {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.link-item:hover {
+  border-color: var(--primary);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.link-favicon {
+  width: 16px;
+  height: 16px;
+  margin-right: 12px;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.link-content {
+  flex: 1;
+  min-width: 0;
+  /* Enable ellipsis */
+}
+
+.link-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.link-url {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+#empty-state {
+  text-align: center;
+  color: var(--text-secondary);
+  margin-top: 40px;
+  font-size: 14px;
+}
+
+/* List View Controls */
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.format-toggle {
+  display: flex;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 2px;
+  flex-shrink: 0;
+}
+
+.url-count {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+
+/* Toggle Button (Shared) */
+.toggle-btn {
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-btn:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-main);
+}
+
+.toggle-btn.active {
+  background-color: var(--surface-color);
+  color: var(--primary);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.toggle-btn.icon-only {
+  padding: 4px;
+  width: 28px;
+  height: 28px;
+}
+
+/* Text Mode */
+#text-mode-container {
+  display: flex;
+  height: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--surface-color);
+  overflow: hidden;
+}
+
+#line-numbers {
+  min-width: 24px;
+  text-align: right;
+  /* Extra bottom padding keeps numbers aligned when the textarea shows a horizontal scrollbar */
+  padding: 12px 6px 20px 4px;
+  color: var(--text-secondary);
+  background-color: var(--bg-color);
+  border-right: 1px solid var(--border-color);
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  /* Must match textarea */
+  overflow: hidden;
+  user-select: none;
+  flex-shrink: 0;
+  white-space: pre;
+}
+
+textarea#url-list-text {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: none;
+  background-color: transparent;
+  color: var(--text-main);
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  resize: none;
+  white-space: pre;
+  /* No wrapping */
+  overflow: auto;
+  outline: none;
+}
+
+#text-mode-container:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+/* Utils */
+.hidden {
+  display: none !important;
+}
