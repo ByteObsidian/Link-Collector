@@ -5,14 +5,14 @@ Follow these steps to upload your extension to the Chrome Web Store.
 ## Prerequisites
 - A Google Account.
 - A Developer Account on the Chrome Web Store (requires a one-time $5 fee).
-- The `link-collector-v1.4.zip` file (already created).
+- A ZIP package of the extension files (create it locally before uploading; generated ZIPs are not stored in this repository).
 - Promotional images (Banner, Icon, Screenshots - currently using placeholders or need to be prepared if not ready).
 
 ## Steps
 
 1.  **Go to the Dashboard**: Visit the [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/developer/dashboard).
 2.  **Create New Item**: Click the **"New Item"** button.
-3.  **Upload Zip**: Drag and drop the `link-collector-v1.4.zip` file or click to browse and select it.
+3.  **Upload Zip**: Drag and drop your locally created extension ZIP or click to browse and select it. Include `manifest.json`, `popup.html`, `popup.js`, `style.css`, and `icon16.png`, `icon48.png`, and `icon128.png`. Do not include the `store-assets/` folder or publishing documentation in the extension package.
 4.  **Fill in Details**:
     - **Store Listing**:
         - **Description**: 
