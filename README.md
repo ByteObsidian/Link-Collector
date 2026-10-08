@@ -39,3 +39,7 @@ The extension manifest is [manifest.json](./manifest.json). The [publishing guid
 - [Project site](https://byteobsidian.github.io/Link-Collector/)
 - [Releases](https://github.com/ByteObsidian/Link-Collector/releases)
 - [Source code](https://github.com/ByteObsidian/Link-Collector)
+
+## License
+
+This project is licensed under the [MIT License](./LICENSE).
