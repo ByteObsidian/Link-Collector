@@ -2,9 +2,11 @@
 
 A privacy-focused Chrome extension for collecting, filtering, and exporting links from your open tabs. Everything runs locally in your browser; tab data is not sent to external servers.
 
-## Download
+## Install
 
-Get the latest signed Chrome package (`.crx`) from [GitHub Releases](https://github.com/ByteObsidian/Link-Collector/releases/latest).
+Install Link Collector from the [Chrome Web Store](https://chromewebstore.google.com/detail/hnhaapmhbcghmldllheljgfdcdbmnmah).
+
+Alternatively, get the latest signed Chrome package (`.crx`) from [GitHub Releases](https://github.com/ByteObsidian/Link-Collector/releases/latest).
 
 Chrome may restrict installing extensions from outside the Chrome Web Store. If your browser allows it, open `chrome://extensions`, enable **Developer mode**, and install the downloaded package. To load the source for development, choose **Load unpacked** and select this project folder.
 
@@ -36,6 +38,7 @@ The extension manifest is [manifest.json](./manifest.json). The [publishing guid
 
 ## Project links
 
+- [Chrome Web Store](https://chromewebstore.google.com/detail/hnhaapmhbcghmldllheljgfdcdbmnmah)
 - [Project site](https://github.com/ByteObsidian/Link-Collector)
 - [Releases](https://github.com/ByteObsidian/Link-Collector/releases)
 - [Source code](https://github.com/ByteObsidian/Link-Collector)
