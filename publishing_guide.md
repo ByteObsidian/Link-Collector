@@ -50,9 +50,22 @@ Follow these steps to upload your extension to the Chrome Web Store.
         - **Screenshots** (1280x800), in this order: `screenshot-1-cards.png` … `screenshot-5-open-all.png`
         - **Small promo tile** (440x280): `small-promo-440x280.png`
         - **Marquee promo tile** (1400x560): `marquee-promo-1400x560.png`
-    - **Privacy Practices**:
-        - **Permissions**: Explain why you need `tabs` and `storage` permissions (e.g., "To access the URL and title of open tabs for collection" and "To save user preferences").
-        - **Data Usage**: State that no user data is collected or sent to external servers.
+    - **Privacy Practices** (paste these into the **Privacy** tab):
+        - **Single purpose description**:
+          > Link Collector lists the titles and URLs of the user's open tabs so they can search, filter and copy them to the clipboard in formats such as plain URLs, Markdown, HTML, CSV or JSON.
+        - **Permission justification, `tabs`**:
+          > Needed to read the title and URL of each open tab so they can be listed, filtered and copied; to switch to a tab when the user clicks it in the list; and to open the links the user pastes when they click "Open all". Tab data is used only inside the popup and is never stored or transmitted.
+        - **Permission justification, `favicon`**:
+          > Used to show each tab's site icon in the list, loaded from the browser's own favicon cache. No requests are made to the websites.
+        - **Permission justification, `storage`**:
+          > Used to save the user's settings (current window only, include active tab, remove duplicates, exclude patterns, view and output format) in chrome.storage.local on the device. No tab data or personal data is stored.
+        - **Remote code**: select **"No, I am not using remote code."** All JavaScript is included in the package.
+        - **Data usage**: leave **every** data type unchecked. The extension reads tab titles and URLs only inside the popup on the user's device and never transmits them, so nothing is "collected" under the Web Store definition.
+        - **Certifications**: tick all three:
+            - I do not sell or transfer user data to third parties, outside of the approved use cases.
+            - I do not use or transfer user data for purposes that are unrelated to my item's single purpose.
+            - I do not use or transfer user data to determine creditworthiness or for lending purposes.
+        - **Privacy policy URL**: `https://byteobsidian.github.io/Link-Collector/privacy.html` (published from `docs/privacy.html`).
 5.  **Submit for Review**: Once all sections are filled (checked with a green tint), click **"Submit for Review"**.
 
 ## Updates
