@@ -72,14 +72,14 @@
     <main>
       <div class="eyebrow">Privacy Policy</div>
       <h1>Your tabs stay on your device</h1>
-      <p class="updated">Last updated: October 8, 2026</p>
+      <p class="updated">Last updated: October 9, 2026</p>
 
       <div class="summary">
         <p>Link Collector does not collect, store on a server, sell or share any of your data. Everything it does happens inside your browser, and nothing is sent to the developer or to anyone else.</p>
       </div>
 
       <h2>What the extension reads</h2>
-      <p>When you open the Link Collector popup, it reads the <strong>titles and URLs of your open tabs</strong> so it can list, filter and copy them. This information is only used to show the list in the popup. It is not saved, logged or transmitted, and it is gone when the popup closes.</p>
+      <p>When you open the Link Collector popup, or use the <strong>Copy tab links</strong> shortcut or menu item, it reads the <strong>titles and URLs of your open tabs</strong> so it can list, filter and copy them. This information is only used for that action. It is not saved, logged or transmitted.</p>
 
       <h2>What the extension saves</h2>
       <p>Link Collector saves your <strong>settings</strong> using the browser's local extension storage (<code>chrome.storage.local</code>) so they are remembered next time:</p>
@@ -88,7 +88,7 @@
         <li>Whether to include the active tab</li>
         <li>Whether to hide duplicate URLs</li>
         <li>Your exclude patterns</li>
-        <li>Your chosen view (cards or text) and output format</li>
+        <li>Your chosen view (cards or text), sort order and output format</li>
       </ul>
       <p>These settings stay on your computer. They are not synced to your Google account and are removed when you uninstall the extension.</p>
 
@@ -101,14 +101,16 @@
         <li>It does not sell, transfer or share data with third parties.</li>
       </ul>
 
-      <h2>Clipboard and opening tabs</h2>
-      <p>Links are copied to your clipboard only when you click <strong>Copy</strong> or press Ctrl+Enter. Tabs are opened only when you click <strong>Open all</strong>, and only for the links shown in the text box.</p>
+      <h2>Clipboard, files and tabs</h2>
+      <p>Links are copied to your clipboard only when you click <strong>Copy</strong>, press Ctrl+Enter or Alt+Shift+C, or choose <strong>Copy tab links</strong> from the toolbar icon's menu. A file is saved only when you click the download button, and it goes straight to your own downloads folder. Tabs are opened only when you click <strong>Open all</strong>, and closed only when you click <strong>Close duplicates</strong>.</p>
 
       <h2>Permissions</h2>
       <ul>
-        <li><code>tabs</code>: to read the titles and URLs of open tabs, switch to a tab when you click it, and open tabs with Open all.</li>
+        <li><code>tabs</code>: to read the titles and URLs of open tabs, switch to a tab when you click it, open tabs with Open all, and close duplicate tabs when you ask.</li>
         <li><code>favicon</code>: to show each site's icon from the browser's own icon cache.</li>
         <li><code>storage</code>: to remember your settings on your device.</li>
+        <li><code>contextMenus</code>: to add Copy tab links to the toolbar icon's right-click menu.</li>
+        <li><code>offscreen</code>: to copy to the clipboard when you use the shortcut or menu without the popup open.</li>
       </ul>
 
       <h2>Changes to this policy</h2>

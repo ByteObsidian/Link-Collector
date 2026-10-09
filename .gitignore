@@ -1,4 +1,5 @@
 *.zip
 *.crx
 *.pem
-store-assets/
+/store-assets/
+tools/store-assets/.build/

@@ -1,0 +1,18 @@
+:root.force-dark {
+  color-scheme: dark;
+  --primary: #60a5fa; --primary-hover: #3b82f6; --success: #22c55e; --error: #f87171; --warning: #fbbf24;
+  --bg-color: #0f172a; --surface-color: #1e293b; --text-main: #f1f5f9; --text-secondary: #94a3b8;
+  --border-color: #334155; --border-hover: #475569; --hover-bg: rgba(255,255,255,0.08);
+  --focus-ring: rgba(96,165,250,0.25); --scrollbar: #475569; --scrollbar-hover: #64748b;
+}
+
+:root.force-light {
+  color-scheme: light;
+  --primary: #3b82f6; --primary-hover: #2563eb; --success: #16a34a; --error: #dc2626; --warning: #d97706;
+  --bg-color: #f8fafc; --surface-color: #ffffff; --text-main: #0f172a; --text-secondary: #64748b;
+  --border-color: #e2e8f0; --border-hover: #cbd5e1; --hover-bg: rgba(0,0,0,0.05);
+  --focus-ring: rgba(59,130,246,0.15); --scrollbar: #cbd5e1; --scrollbar-hover: #94a3b8;
+}
+
+/* Headless screenshots capture mid-transition; disable them */
+* { transition: none !important; }

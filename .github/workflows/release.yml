@@ -1,0 +1,52 @@
+name: Build release package
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check manifest version matches tag
+        if: github.ref_type == 'tag'
+        run: |
+          version=$(jq -r .version manifest.json)
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::manifest.json version $version does not match tag $GITHUB_REF_NAME"
+            exit 1
+          fi
+
+      - name: Build Chrome Web Store zip
+        run: |
+          version=$(jq -r .version manifest.json)
+          echo "ZIP=link-collector-v$version.zip" >> "$GITHUB_ENV"
+          zip -r "link-collector-v$version.zip" \
+            manifest.json popup.html popup.js style.css \
+            background.js offscreen.html offscreen.js lib icons/icon16.png icons/icon48.png icons/icon128.png
+          unzip -l "link-collector-v$version.zip"
+
+      - name: Attach zip to the release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "$ZIP" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "$ZIP" --title "Link Collector $GITHUB_REF_NAME" --generate-notes
+          fi
+
+      - name: Keep the zip as a workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ZIP }}
+          path: ${{ env.ZIP }}
