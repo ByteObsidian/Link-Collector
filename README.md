@@ -1,4 +1,4 @@
-# Link Collector
+# Link Collector (Chrome extension)
 
 A privacy-focused Chrome extension for collecting, filtering, and exporting links from your open tabs. Everything runs locally in your browser; tab data is not sent to external servers.
 
