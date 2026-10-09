@@ -2,13 +2,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   const linkList = document.getElementById('link-list');
   const copyBtn = document.getElementById('copy-btn');
   const openBtn = document.getElementById('open-btn');
+  const downloadBtn = document.getElementById('download-btn');
+  const closeDuplicatesBtn = document.getElementById('close-duplicates-btn');
+  const clearSelectionBtn = document.getElementById('clear-selection-btn');
   const searchInput = document.getElementById('search-input');
   const excludePatternInput = document.getElementById('exclude-pattern');
   const currentWindowCheckbox = document.getElementById('current-window-only');
   const includeActiveTabCheckbox = document.getElementById('include-active-tab');
   const dedupeCheckbox = document.getElementById('dedupe');
   const outputFormatSelect = document.getElementById('output-format');
+  const sortModeSelect = document.getElementById('sort-mode');
   const emptyState = document.getElementById('empty-state');
+  const editNotice = document.getElementById('edit-notice');
+  const resetTextBtn = document.getElementById('reset-text-btn');
 
   // List View Format Elements
   const urlListText = document.getElementById('url-list-text');
@@ -20,9 +26,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const lineNumbers = document.getElementById('line-numbers');
   const textModeContainer = document.getElementById('text-mode-container');
 
-  // Browser pages that are never worth collecting
-  const IGNORED_URL_PREFIXES = ['chrome://newtab', 'chrome://downloads', 'edge://newtab', 'about:blank'];
-
   // Ask for confirmation before opening more tabs than this at once
   const OPEN_CONFIRM_THRESHOLD = 10;
 
@@ -30,12 +33,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   let allTabs = [];
   let currentWindowId = null;
   let listFormat = 'text'; // 'ui' or 'text'
+  let textEdited = false; // true once the user types in the text box, so filters stop overwriting it
+  const selectedTabIds = new Set();
 
   // Initialize
   const [tabs, currentWindow, storage] = await Promise.all([
     chrome.tabs.query({}),
     chrome.windows.getCurrent(),
-    chrome.storage.local.get(['currentWindowOnly', 'includeActiveTab', 'excludePattern', 'dedupe', 'listFormat', 'outputFormat'])
+    chrome.storage.local.get(['currentWindowOnly', 'includeActiveTab', 'excludePattern', 'dedupe', 'listFormat', 'outputFormat', 'sortMode'])
   ]);
   allTabs = tabs;
   currentWindowId = currentWindow.id;
@@ -47,6 +52,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   excludePatternInput.value = storage.excludePattern || '';
   if (storage.outputFormat) {
     outputFormatSelect.value = storage.outputFormat;
+  }
+  if (storage.sortMode) {
+    sortModeSelect.value = storage.sortMode;
   }
   setListFormat(storage.listFormat === 'ui' ? 'ui' : 'text');
 
@@ -72,10 +80,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     chrome.storage.local.set({ outputFormat: outputFormatSelect.value });
     updateList();
   });
+  sortModeSelect.addEventListener('change', () => {
+    chrome.storage.local.set({ sortMode: sortModeSelect.value });
+    updateList();
+  });
 
   // Format Switching (List vs Text)
   formatUiBtn.addEventListener('click', () => setListFormat('ui'));
   formatTextBtn.addEventListener('click', () => setListFormat('text'));
+
+  clearSelectionBtn.addEventListener('click', () => {
+    selectedTabIds.clear();
+    updateList();
+  });
+
+  resetTextBtn.addEventListener('click', () => {
+    setTextEdited(false);
+    updateList();
+  });
 
   // Ctrl/Cmd + Enter copies from anywhere in the popup
   document.addEventListener('keydown', (e) => {
@@ -96,7 +118,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     textModeContainer.classList.toggle('hidden', isUi);
     // Opening URLs only makes sense for the editable text box
     openBtn.classList.toggle('hidden', isUi);
+    editNotice.classList.toggle('hidden', isUi || !textEdited);
     updateList();
+  }
+
+  function setTextEdited(edited) {
+    textEdited = edited;
+    editNotice.classList.toggle('hidden', !edited || listFormat !== 'text');
   }
 
   // Line Numbers Logic
@@ -110,115 +138,107 @@ document.addEventListener('DOMContentLoaded', async () => {
     lineNumbers.scrollTop = urlListText.scrollTop;
   });
 
-  urlListText.addEventListener('input', updateLineNumbers);
-
-  function getExcludePatterns() {
-    return excludePatternInput.value
-      .split(',')
-      .map(p => p.trim().toLowerCase())
-      .filter(Boolean);
-  }
+  urlListText.addEventListener('input', () => {
+    setTextEdited(true);
+    updateLineNumbers();
+  });
 
   function getVisibleTabs() {
-    const query = searchInput.value.trim().toLowerCase();
-    const excludePatterns = getExcludePatterns();
-    const onlyCurrentWindow = currentWindowCheckbox.checked;
-    const includeActiveTab = includeActiveTabCheckbox.checked;
-    const seenUrls = new Set();
-
-    return allTabs.filter(tab => {
-      const url = tab.url || '';
-      const lowerUrl = url.toLowerCase();
-
-      if (!url || IGNORED_URL_PREFIXES.some(prefix => lowerUrl.startsWith(prefix))) {
-        return false;
-      }
-
-      if (excludePatterns.some(pattern => lowerUrl.includes(pattern))) {
-        return false;
-      }
-
-      // Exclude current active tab unless included
-      if (!includeActiveTab && tab.active && tab.windowId === currentWindowId) {
-        return false;
-      }
-
-      if (onlyCurrentWindow && tab.windowId !== currentWindowId) {
-        return false;
-      }
-
-      const matchesSearch = !query ||
-        (tab.title || '').toLowerCase().includes(query) ||
-        lowerUrl.includes(query);
-      if (!matchesSearch) {
-        return false;
-      }
-
-      if (dedupeCheckbox.checked) {
-        if (seenUrls.has(url)) {
-          return false;
-        }
-        seenUrls.add(url);
-      }
-
-      return true;
+    const filtered = LinkCollector.filterTabs(allTabs, {
+      query: searchInput.value,
+      excludePattern: excludePatternInput.value,
+      currentWindowOnly: currentWindowCheckbox.checked,
+      includeActiveTab: includeActiveTabCheckbox.checked,
+      dedupe: dedupeCheckbox.checked,
+      currentWindowId
     });
+    return LinkCollector.sortTabs(filtered, sortModeSelect.value, currentWindowId);
   }
 
-  function escapeHtml(str) {
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  // What Copy, Download and the text box use: the selected cards if any are ticked, otherwise every visible tab
+  function getOutputTabs(visibleTabs = getVisibleTabs()) {
+    const selected = visibleTabs.filter(tab => selectedTabIds.has(tab.id));
+    return selected.length > 0 ? selected : visibleTabs;
   }
 
-  function escapeCsv(str) {
-    return /[",\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
-  }
-
-  // Serialize tabs in the selected output format
-  function formatTabs(tabsToFormat) {
-    const title = tab => tab.title || tab.url;
-
-    switch (outputFormatSelect.value) {
-      case 'title-url':
-        return tabsToFormat.map(t => `${title(t)}\n${t.url}`).join('\n\n');
-      case 'markdown':
-        return tabsToFormat.map(t => `- [${title(t).replace(/([\[\]])/g, '\\$1')}](${t.url})`).join('\n');
-      case 'html':
-        return tabsToFormat.map(t => `<a href="${escapeHtml(t.url)}">${escapeHtml(title(t))}</a>`).join('\n');
-      case 'csv':
-        return ['Title,URL', ...tabsToFormat.map(t => `${escapeCsv(title(t))},${escapeCsv(t.url)}`)].join('\n');
-      case 'json':
-        return JSON.stringify(tabsToFormat.map(t => ({ title: title(t), url: t.url })), null, 2);
-      default:
-        return tabsToFormat.map(t => t.url).join('\n');
-    }
+  // Duplicates are counted within the chosen window scope, ignoring search and exclude filters
+  function getDuplicateTabs() {
+    const scope = currentWindowCheckbox.checked ? allTabs.filter(t => t.windowId === currentWindowId) : allTabs;
+    return LinkCollector.findDuplicateTabs(scope);
   }
 
   function updateList() {
-    renderLinks(getVisibleTabs());
-  }
+    const visibleTabs = getVisibleTabs();
+    const outputTabs = getOutputTabs(visibleTabs);
+    const selectedCount = outputTabs === visibleTabs ? 0 : outputTabs.length;
 
-  function renderLinks(tabsToRender) {
-    const count = tabsToRender.length;
-    urlCountLabel.textContent = `${count} ${count === 1 ? 'URL' : 'URLs'}`;
+    const count = visibleTabs.length;
+    urlCountLabel.textContent = selectedCount > 0
+      ? `${selectedCount} of ${count} selected`
+      : `${count} ${count === 1 ? 'URL' : 'URLs'}`;
+    clearSelectionBtn.classList.toggle('hidden', selectedCount === 0);
+    copyBtn.textContent = selectedCount > 0 ? `Copy ${selectedCount}` : 'Copy';
+    copyBtn.dataset.originalText = copyBtn.textContent;
     emptyState.classList.toggle('hidden', count > 0);
 
+    const duplicateCount = getDuplicateTabs().length;
+    closeDuplicatesBtn.classList.toggle('hidden', duplicateCount === 0);
+    closeDuplicatesBtn.textContent = `Close ${duplicateCount} duplicate${duplicateCount === 1 ? '' : 's'}`;
+    closeDuplicatesBtn.dataset.originalText = closeDuplicatesBtn.textContent;
+
     if (listFormat === 'text') {
-      urlListText.value = formatTabs(tabsToRender);
-      updateLineNumbers();
+      if (!textEdited) {
+        urlListText.value = LinkCollector.formatTabs(outputTabs, outputFormatSelect.value);
+        updateLineNumbers();
+      }
     } else {
-      renderListUi(tabsToRender);
+      renderListUi(visibleTabs);
     }
   }
 
   function renderListUi(tabsToRender) {
     linkList.innerHTML = '';
 
+    // Label each window's group when sorting by window across several windows
+    const showWindowHeaders = sortModeSelect.value === 'window' &&
+      new Set(tabsToRender.map(t => t.windowId)).size > 1;
+    let lastWindowId = null;
+    let windowNumber = 0;
+
     tabsToRender.forEach((tab) => {
+      if (showWindowHeaders && tab.windowId !== lastWindowId) {
+        lastWindowId = tab.windowId;
+        windowNumber++;
+        const header = document.createElement('li');
+        header.className = 'window-header';
+        header.textContent = tab.windowId === currentWindowId ? 'This window' : `Window ${windowNumber}`;
+        linkList.appendChild(header);
+      }
+
       const li = document.createElement('li');
       li.className = 'link-item';
-      li.title = 'Click to switch to this tab';
+      li.classList.toggle('selected', selectedTabIds.has(tab.id));
 
-      li.addEventListener('click', () => {
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'link-select';
+      checkbox.checked = selectedTabIds.has(tab.id);
+      checkbox.setAttribute('aria-label', `Select ${tab.title || tab.url}`);
+      checkbox.addEventListener('change', () => {
+        if (checkbox.checked) {
+          selectedTabIds.add(tab.id);
+        } else {
+          selectedTabIds.delete(tab.id);
+        }
+        updateList();
+      });
+
+      // A real button so the card can be reached with Tab and opened with Enter or Space
+      const main = document.createElement('button');
+      main.type = 'button';
+      main.className = 'link-main';
+      main.title = 'Switch to this tab';
+      main.addEventListener('click', () => {
         chrome.tabs.update(tab.id, { active: true });
         chrome.windows.update(tab.windowId, { focused: true });
       });
@@ -228,10 +248,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       img.src = `chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${encodeURIComponent(tab.url)}&size=32`;
       img.alt = '';
 
-      const content = document.createElement('div');
+      const content = document.createElement('span');
       content.className = 'link-content';
 
-      const title = document.createElement('div');
+      const title = document.createElement('span');
       title.className = 'link-title';
       title.textContent = tab.title || tab.url;
 
@@ -241,9 +261,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       content.appendChild(title);
       content.appendChild(urlSpan);
+      main.appendChild(img);
+      main.appendChild(content);
 
-      li.appendChild(img);
-      li.appendChild(content);
+      li.appendChild(checkbox);
+      li.appendChild(main);
       linkList.appendChild(li);
     });
   }
@@ -261,10 +283,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 2000);
   }
 
-  // Copy to clipboard functionality
+  // Two clicks within 2 seconds to confirm a bulk action
+  function needsConfirm(btn, message) {
+    if (btn.dataset.confirming === 'true') {
+      btn.dataset.confirming = '';
+      return false;
+    }
+    btn.dataset.confirming = 'true';
+    flashButton(btn, message, 'warning');
+    setTimeout(() => { btn.dataset.confirming = ''; }, 2000);
+    return true;
+  }
+
+  // In text mode, use the textarea so manual edits are kept
+  function getOutputText() {
+    return listFormat === 'text'
+      ? urlListText.value
+      : LinkCollector.formatTabs(getOutputTabs(), outputFormatSelect.value);
+  }
+
   copyBtn.addEventListener('click', async () => {
-    // In text mode, copy the textarea so manual edits are kept
-    const textToCopy = listFormat === 'text' ? urlListText.value : formatTabs(getVisibleTabs());
+    const textToCopy = getOutputText();
     if (!textToCopy.trim()) return;
 
     try {
@@ -276,27 +315,57 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // Open every http(s) URL found in the text box (works with any output format or pasted text)
-  let pendingOpenConfirm = false;
+  downloadBtn.addEventListener('click', () => {
+    const text = getOutputText();
+    if (!text.trim()) return;
+
+    const format = outputFormatSelect.value;
+    const date = new Date().toISOString().slice(0, 10);
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `link-collector-${date}.${LinkCollector.FILE_EXTENSIONS[format] || 'txt'}`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  });
+
+  closeDuplicatesBtn.addEventListener('click', async () => {
+    const duplicates = getDuplicateTabs();
+    if (duplicates.length === 0) return;
+    if (needsConfirm(closeDuplicatesBtn, `Close ${duplicates.length}?`)) return;
+
+    await chrome.tabs.remove(duplicates.map(t => t.id));
+    allTabs = await chrome.tabs.query({});
+    for (const id of [...selectedTabIds]) {
+      if (!allTabs.some(t => t.id === id)) selectedTabIds.delete(id);
+    }
+    updateList();
+  });
+
+  // Open every http(s) URL found in the text box, skipping ones that already have a tab
   openBtn.addEventListener('click', async () => {
-    const urls = [...new Set(urlListText.value.match(/https?:\/\/[^\s"'<>)\]]+/g) || [])];
+    const urls = LinkCollector.extractUrls(urlListText.value);
     if (urls.length === 0) {
       flashButton(openBtn, 'No URLs', 'error');
       return;
     }
 
-    if (urls.length > OPEN_CONFIRM_THRESHOLD && !pendingOpenConfirm) {
-      pendingOpenConfirm = true;
-      flashButton(openBtn, `Open ${urls.length}?`, 'warning');
-      setTimeout(() => { pendingOpenConfirm = false; }, 2000);
+    const openUrls = new Set((await chrome.tabs.query({})).map(t => t.url));
+    const newUrls = urls.filter(url => !openUrls.has(url));
+    if (newUrls.length === 0) {
+      flashButton(openBtn, 'All open', 'success');
       return;
     }
-    pendingOpenConfirm = false;
+
+    if (newUrls.length > OPEN_CONFIRM_THRESHOLD && needsConfirm(openBtn, `Open ${newUrls.length}?`)) {
+      return;
+    }
 
     // Open in the background so the popup stays open until all tabs are created
-    for (const url of urls) {
+    for (const url of newUrls) {
       await chrome.tabs.create({ url, active: false, windowId: currentWindowId });
     }
-    flashButton(openBtn, `Opened ${urls.length}`, 'success');
+    const skipped = urls.length - newUrls.length;
+    flashButton(openBtn, skipped > 0 ? `Opened ${newUrls.length}, skipped ${skipped}` : `Opened ${newUrls.length}`, 'success');
   });
 });

@@ -13,7 +13,10 @@
     <header>
       <div class="header-top">
         <h1>Link Collector</h1>
-        <span id="url-count" class="url-count">0 URLs</span>
+        <div class="header-meta">
+          <button id="clear-selection-btn" class="link-btn hidden" title="Clear selection">Clear</button>
+          <span id="url-count" class="url-count" aria-live="polite">0 URLs</span>
+        </div>
       </div>
 
       <div id="list-view-controls">
@@ -47,12 +50,23 @@
         </div>
 
         <input type="text" id="exclude-pattern" class="text-input"
-          placeholder="Exclude, comma separated (e.g. mail, youtube)" autocomplete="off">
+          placeholder="Exclude, comma separated (e.g. mail, *.google.com/*)" autocomplete="off">
 
         <div class="filter-options">
           <label><input type="checkbox" id="current-window-only"> Current window</label>
           <label><input type="checkbox" id="include-active-tab"> Active tab</label>
           <label><input type="checkbox" id="dedupe"> No duplicates</label>
+        </div>
+
+        <div class="tools-row">
+          <select id="sort-mode" class="select-input" title="Sort order">
+            <option value="tab">Sort: Tab order</option>
+            <option value="window">Sort: By window</option>
+            <option value="title">Sort: Title</option>
+            <option value="site">Sort: Site</option>
+          </select>
+          <button id="close-duplicates-btn" class="secondary-btn hidden"
+            title="Close tabs whose URL is already open in another tab">Close duplicates</button>
         </div>
 
         <div class="action-row">
@@ -64,6 +78,14 @@
             <option value="csv">CSV</option>
             <option value="json">JSON</option>
           </select>
+          <button id="download-btn" class="secondary-btn icon-btn" title="Download as a file" aria-label="Download as a file">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </button>
           <button id="copy-btn" class="primary-btn" title="Copy (Ctrl+Enter)">Copy</button>
           <button id="open-btn" class="secondary-btn" title="Open every URL in the text box as a new tab">Open all</button>
         </div>
@@ -72,6 +94,11 @@
 
     <main>
       <div id="list-view">
+        <div id="edit-notice" class="edit-notice hidden" role="status">
+          <span>Edited. Filters won't replace your text.</span>
+          <button id="reset-text-btn" class="link-btn">Reset to tabs</button>
+        </div>
+
         <ul id="link-list"></ul>
 
         <div id="text-mode-container" class="hidden">
@@ -85,6 +112,7 @@
       </div>
     </main>
   </div>
+  <script src="lib/links.js"></script>
   <script src="popup.js"></script>
 </body>
 
